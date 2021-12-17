@@ -2,12 +2,13 @@
 
 ![Screenshot](screenshot.png)
 
-Generate and check Discord Nitro codes and save working ones to a file or Webhook.
+Discord Nitro codes generator and checker with built-in proxy grabber. Saves working ones to a file or Webhook.
 
 ## Usage
 
 - Make sure `Python` version is 3.7 or higher.
-- Install dependencies from `requirements.txt` (`pip install -r requirements.txt`).
+- Install dependencies from `requirements.txt` (`python -m pip install -U -r requirements.txt`).
+  - If you get an error while installing dependencies, remove the `cchardet<3.0.0` line from the `requirements.txt` file and try installing them again.
 - Edit `config.py` according to your preference.
 - Run `main.py`.
 
