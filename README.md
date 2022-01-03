@@ -8,7 +8,7 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
 
 - Make sure `Python` version is 3.7 or higher.
 - Install dependencies from `requirements.txt` (`python -m pip install -U -r requirements.txt`).
-  - If you get an error while installing dependencies, remove the `cchardet<3.0.0` line from the `requirements.txt` file and try installing them again.
+  - If you want to improve the performance, you can also install `cchardet`. See [aiohttp documentation](https://docs.aiohttp.org/en/stable/index.html?highlight=cchardet#library-installation).
 - Edit `config.py` according to your preference.
 - Run `main.py`.
 
