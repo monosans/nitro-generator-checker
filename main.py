@@ -84,7 +84,7 @@ class NitroGeneratorChecker:
             if status == 404:
                 self.c.print(f"{code} | Invalid")
                 self.count += 1
-                live.update(self.get_table())
+                live.update(self.table)
             elif status == 429:
                 self.c.print(f"{code} | {proxy} is temporarily blocked")
             elif 400 <= status < 600:
@@ -100,18 +100,17 @@ class NitroGeneratorChecker:
                         pass
                 self.valid_count += 1
                 self.count += 1
-                live.update(self.get_table())
+                live.update(self.table)
 
-    def get_table(self) -> Table:
-        table = Table()
-        table.add_column("Total")
-        table.add_column("Valid")
+    @property
+    def table(self) -> Table:
+        table = Table("Total", "Valid")
         table.add_row(str(self.count), str(self.valid_count))
         return table
 
     async def main(self) -> None:
         await self.set_proxies()
-        with Live(self.get_table(), console=self.c) as live:
+        with Live(self.table, console=self.c) as live:
             coroutines = (self.checker(live) for _ in range(self.THREADS))
             await asyncio.gather(self.grab_proxies(), *coroutines)
 
