@@ -37,8 +37,11 @@ class NitroGeneratorChecker:
         self.valid_count = 0
 
     async def fetch(self, url: str) -> str:
-        async with self.s.get(url) as r:
-            return await r.text()
+        try:
+            async with self.s.get(url, raise_for_status=True) as r:
+                return await r.text()
+        except Exception:
+            return ""
 
     async def set_proxies(self) -> None:
         url = "https://api.proxyscrape.com/v2/?request=getproxies&protocol="
