@@ -6,9 +6,10 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
 
 ## Usage
 
-- Make sure `Python` version is 3.7 or higher.
-- Install dependencies from `requirements.txt` (`python -m pip install -U -r requirements.txt`).
-  - If you want to improve the performance, you can also install `cchardet`. See [aiohttp documentation](https://docs.aiohttp.org/en/stable/index.html?highlight=cchardet#library-installation).
+- Install [Python](https://python.org/downloads) (Windows 7 requires Python 3.8.X). During installation, be sure to check the box `Add Python to PATH`.
+- Download and unpack [the archive with the program](https://github.com/monosans/nitro-generator-checker/archive/refs/heads/main.zip).
+- Install dependencies from `requirements.txt` (`python -m pip install -U -r requirements.txt` on the command line).
+  - If you want to improve the performance, you can also install extra dependencies. See [aiohttp documentation](https://docs.aiohttp.org/en/stable/index.html#library-installation).
 - Edit `config.py` according to your preference.
 - Run `main.py`.
 
