@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # How many codes to check concurrently?
-# Don't set higher than 950, please.
-THREADS = 950
+# Don't set higher than 900, please.
+THREADS = 900
 
 # Leave blank if you want the nitro codes to be only saved to the FILE_NAME.
 WEBHOOK_URL = ""
