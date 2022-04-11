@@ -16,11 +16,24 @@ import config
 
 
 class NitroGeneratorChecker:
+    __slots__ = (
+        "s",
+        "c",
+        "threads",
+        "webhook_url",
+        "timeout",
+        "file_name",
+        "symbols",
+        "count",
+        "valid_count",
+        "proxies",
+    )
+
     def __init__(
         self,
         *,
         session: ClientSession,
-        threads: int = 950,
+        threads: int = 900,
         webhook_url: Optional[str] = None,
         timeout: float = 10,
         file_name: str = "nitro_codes.txt",
@@ -28,11 +41,11 @@ class NitroGeneratorChecker:
     ) -> None:
         self.s = session
         self.c = console or Console(highlight=False)
-        self.THREADS = threads
-        self.WEBHOOK_URL = webhook_url or None
-        self.TIMEOUT = timeout
-        self.FILE_NAME = file_name
-        self.SYMBOLS = ascii_letters + digits
+        self.threads = threads
+        self.webhook_url = webhook_url or None
+        self.timeout = timeout
+        self.file_name = file_name
+        self.symbols = ascii_letters + digits
         self.count = 0
         self.valid_count = 0
 
@@ -61,7 +74,7 @@ class NitroGeneratorChecker:
 
     async def checker(self, live: Live) -> None:
         while True:
-            code = "".join(choices(self.SYMBOLS, k=16))
+            code = "".join(choices(self.symbols, k=16))
             url = f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
             proxy = choice(self.proxies)
             try:
@@ -74,7 +87,7 @@ class NitroGeneratorChecker:
                             "with_application": "false",
                             "with_subscription_plan": "true",
                         },
-                        timeout=self.TIMEOUT,
+                        timeout=self.timeout,
                     ) as r:
                         status = r.status
             except Exception as e:
@@ -94,11 +107,11 @@ class NitroGeneratorChecker:
                 self.c.print(f"{code} | {status}")
             else:
                 gift = f"https://discord.gift/{code}"
-                async with open(self.FILE_NAME, "a") as f:
+                async with open(self.file_name, "a") as f:
                     await f.write(f"\n{gift}")
-                if self.WEBHOOK_URL:
+                if self.webhook_url:
                     async with self.s.post(
-                        self.WEBHOOK_URL, json={"content": f"@everyone {gift}"}
+                        self.webhook_url, json={"content": f"@everyone {gift}"}
                     ):
                         pass
                 self.valid_count += 1
@@ -114,7 +127,7 @@ class NitroGeneratorChecker:
     async def main(self) -> None:
         await self.set_proxies()
         with Live(self.table, console=self.c) as live:
-            coroutines = (self.checker(live) for _ in range(self.THREADS))
+            coroutines = (self.checker(live) for _ in range(self.threads))
             await asyncio.gather(self.grab_proxies(), *coroutines)
 
 
