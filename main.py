@@ -106,7 +106,7 @@ class NitroGeneratorChecker:
                 self.c.print(f"{code} | {status}")
             else:
                 gift = f"https://discord.gift/{code}"
-                async with open(self.file_name, "a") as f:
+                async with open(self.file_name, "a", encoding="utf-8") as f:
                     await f.write(f"\n{gift}")
                 if self.webhook_url:
                     async with self.s.post(
@@ -132,7 +132,7 @@ class NitroGeneratorChecker:
 
 async def main() -> None:
     config = ConfigParser()
-    config.read("config.ini")
+    config.read("config.ini", encoding="utf-8")
     cfg = config["DEFAULT"]
     async with ClientSession() as session:
         await NitroGeneratorChecker(
