@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import asyncio
+from configparser import ConfigParser
 from random import choice, choices
 from string import ascii_letters, digits
 from typing import NoReturn, Optional
@@ -11,8 +12,6 @@ from aiohttp_socks import ProxyConnector
 from rich.console import Console
 from rich.live import Live
 from rich.table import Table
-
-import config
 
 
 class NitroGeneratorChecker:
@@ -33,10 +32,10 @@ class NitroGeneratorChecker:
         self,
         *,
         session: ClientSession,
-        threads: int = 900,
-        webhook_url: Optional[str] = None,
-        timeout: float = 10,
-        file_name: str = "nitro_codes.txt",
+        threads: int,
+        webhook_url: Optional[str],
+        timeout: float,
+        file_name: str,
         console: Optional[Console] = None,
     ) -> None:
         self.s = session
@@ -132,13 +131,16 @@ class NitroGeneratorChecker:
 
 
 async def main() -> None:
+    config = ConfigParser()
+    config.read("config.ini")
+    cfg = config["DEFAULT"]
     async with ClientSession() as session:
         await NitroGeneratorChecker(
             session=session,
-            threads=config.THREADS,
-            webhook_url=config.WEBHOOK_URL,
-            timeout=config.TIMEOUT,
-            file_name=config.FILE_NAME,
+            threads=cfg.getint("Threads", 900),
+            webhook_url=cfg.get("WebhookURL"),
+            timeout=cfg.getfloat("Timeout", 10),
+            file_name=cfg.get("FileName", "nitro_codes.txt"),
         ).main()
 
 
