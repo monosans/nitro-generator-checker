@@ -52,8 +52,9 @@ class NitroGeneratorChecker:
         try:
             async with self.s.get(url, raise_for_status=True) as r:
                 return await r.text()
-        except Exception:
-            return ""
+        except Exception as e:
+            self.c.print(f"[red]Couldn't download proxies: {e}")
+        return ""
 
     async def set_proxies(self) -> None:
         url = "https://api.proxyscrape.com/v2/?request=getproxies&protocol="
@@ -68,33 +69,31 @@ class NitroGeneratorChecker:
 
     async def grab_proxies(self) -> NoReturn:
         while True:
-            await asyncio.sleep(10)
+            await asyncio.sleep(60)
             await self.set_proxies()
 
     async def checker(self, live: Live) -> None:
+        params = {
+            "with_application": "false",
+            "with_subscription_plan": "true",
+        }
         while True:
+            if not self.proxies:
+                continue
             code = "".join(choices(self.symbols, k=16))
             url = f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
             proxy = choice(self.proxies)
+            connector = ProxyConnector.from_url(proxy)
             try:
-                async with ClientSession(
-                    connector=ProxyConnector.from_url(proxy)
-                ) as session:
+                async with ClientSession(connector=connector) as session:
                     async with session.get(
-                        url,
-                        params={
-                            "with_application": "false",
-                            "with_subscription_plan": "true",
-                        },
-                        timeout=self.timeout,
+                        url, params=params, timeout=self.timeout
                     ) as r:
                         status = r.status
             except Exception as e:
                 # Too many open files
                 if isinstance(e, OSError) and e.errno == 24:
-                    self.c.print(
-                        "[red]Please, set THREADS to lower value.[/red]"
-                    )
+                    self.c.print("[red]Please, set THREADS to lower value.")
                 continue
             if status == 404:
                 self.c.print(f"{code} | Invalid")
