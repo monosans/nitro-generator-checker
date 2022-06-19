@@ -6,7 +6,7 @@ from random import choice, choices
 from string import ascii_letters, digits
 from typing import NoReturn, Optional
 
-from aiofiles import open
+from aiofiles import open as aopen
 from aiohttp import ClientSession
 from aiohttp_socks import ProxyConnector
 from rich.console import Console
@@ -22,7 +22,7 @@ class NitroGeneratorChecker:
         "webhook_url",
         "timeout",
         "file_name",
-        "symbols",
+        "characters",
         "count",
         "valid_count",
         "proxies",
@@ -44,7 +44,7 @@ class NitroGeneratorChecker:
         self.webhook_url = webhook_url or None
         self.timeout = timeout
         self.file_name = file_name
-        self.symbols = ascii_letters + digits
+        self.characters = ascii_letters + digits
         self.count = 0
         self.valid_count = 0
 
@@ -72,7 +72,7 @@ class NitroGeneratorChecker:
             await asyncio.sleep(60)
             await self.set_proxies()
 
-    async def checker(self, live: Live) -> None:
+    async def checker(self, live: Live) -> NoReturn:
         params = {
             "with_application": "false",
             "with_subscription_plan": "true",
@@ -80,7 +80,7 @@ class NitroGeneratorChecker:
         while True:
             if not self.proxies:
                 continue
-            code = "".join(choices(self.symbols, k=16))
+            code = "".join(choices(self.characters, k=16))
             url = f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
             proxy = choice(self.proxies)
             connector = ProxyConnector.from_url(proxy)
@@ -105,7 +105,7 @@ class NitroGeneratorChecker:
                 self.c.print(f"{code} | {status}")
             else:
                 gift = f"https://discord.gift/{code}"
-                async with open(self.file_name, "a", encoding="utf-8") as f:
+                async with aopen(self.file_name, "a", encoding="utf-8") as f:
                     await f.write(f"\n{gift}")
                 if self.webhook_url:
                     async with self.s.post(
