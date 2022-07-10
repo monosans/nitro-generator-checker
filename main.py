@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import asyncio
 from configparser import ConfigParser
 from random import choice, choices
 from string import ascii_letters, digits
-from typing import NoReturn, Optional
+from typing import NoReturn
 
 from aiofiles import open as aopen
 from aiohttp import ClientSession
@@ -33,10 +34,10 @@ class NitroGeneratorChecker:
         *,
         session: ClientSession,
         threads: int,
-        webhook_url: Optional[str],
+        webhook_url: str | None,
         timeout: float,
         file_name: str,
-        console: Optional[Console] = None,
+        console: Console | None = None,
     ) -> None:
         self.s = session
         self.c = console or Console(highlight=False)
