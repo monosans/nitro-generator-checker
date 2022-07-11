@@ -17,8 +17,8 @@ from rich.table import Table
 
 class NitroGeneratorChecker:
     __slots__ = (
-        "s",
-        "c",
+        "session",
+        "console",
         "threads",
         "webhook_url",
         "timeout",
@@ -39,8 +39,8 @@ class NitroGeneratorChecker:
         file_name: str,
         console: Console | None = None,
     ) -> None:
-        self.s = session
-        self.c = console or Console(highlight=False)
+        self.session = session
+        self.console = console or Console(highlight=False)
         self.threads = threads
         self.webhook_url = webhook_url or None
         self.timeout = timeout
@@ -51,10 +51,10 @@ class NitroGeneratorChecker:
 
     async def fetch(self, url: str) -> str:
         try:
-            async with self.s.get(url, raise_for_status=True) as r:
+            async with self.session.get(url, raise_for_status=True) as r:
                 return await r.text()
         except Exception as e:
-            self.c.print(f"[red]Couldn't download proxies: {e}")
+            self.console.print(f"[red]Couldn't download proxies: {e}")
         return ""
 
     async def set_proxies(self) -> None:
@@ -74,42 +74,41 @@ class NitroGeneratorChecker:
             await self.set_proxies()
 
     async def checker(self, live: Live) -> NoReturn:
-        params = {
-            "with_application": "false",
-            "with_subscription_plan": "true",
-        }
         while True:
             if not self.proxies:
                 continue
             code = "".join(choices(self.characters, k=16))
-            url = f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
+            url = (
+                f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
+                + "?with_application=false&with_subscription_plan=true"
+            )
             proxy = choice(self.proxies)
             connector = ProxyConnector.from_url(proxy)
             try:
                 async with ClientSession(connector=connector) as session:
-                    async with session.get(
-                        url, params=params, timeout=self.timeout
-                    ) as r:
+                    async with session.get(url, timeout=self.timeout) as r:
                         status = r.status
             except Exception as e:
                 # Too many open files
                 if isinstance(e, OSError) and e.errno == 24:
-                    self.c.print("[red]Please, set THREADS to lower value.")
+                    self.console.print(
+                        "[red]Please, set Threads to lower value."
+                    )
                 continue
             if status == 404:
-                self.c.print(f"{code} | Invalid")
+                self.console.print(f"{code} | Invalid")
                 self.count += 1
                 live.update(self.table)
             elif status == 429:
-                self.c.print(f"{code} | {proxy} is temporarily blocked")
-            elif 400 <= status < 600:
-                self.c.print(f"{code} | {status}")
+                self.console.print(f"{code} | {proxy} is temporarily blocked")
+            elif 400 <= status:
+                self.console.print(f"{code} | {status}")
             else:
                 gift = f"https://discord.gift/{code}"
                 async with aopen(self.file_name, "a", encoding="utf-8") as f:
                     await f.write(f"\n{gift}")
                 if self.webhook_url:
-                    async with self.s.post(
+                    async with self.session.post(
                         self.webhook_url, json={"content": f"@everyone {gift}"}
                     ):
                         pass
@@ -125,7 +124,7 @@ class NitroGeneratorChecker:
 
     async def main(self) -> None:
         await self.set_proxies()
-        with Live(self.table, console=self.c) as live:
+        with Live(self.table, console=self.console) as live:
             coroutines = (self.checker(live) for _ in range(self.threads))
             await asyncio.gather(self.grab_proxies(), *coroutines)
 
