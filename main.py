@@ -51,17 +51,19 @@ class NitroGeneratorChecker:
 
     async def fetch(self, url: str) -> str:
         try:
-            async with self.session.get(url, raise_for_status=True) as r:
-                return await r.text()
+            async with self.session.get(
+                url, raise_for_status=True
+            ) as response:
+                return await response.text()
         except Exception as e:
-            self.console.print(f"[red]Couldn't download proxies: {e}")
+            self.console.print("[red]Couldn't download proxies: " + str(e))
         return ""
 
     async def set_proxies(self) -> None:
         url = "https://api.proxyscrape.com/v2/?request=getproxies&protocol="
         protocols = ("http", "socks4", "socks5")
-        coroutines = (self.fetch(f"{url}{proto}") for proto in protocols)
-        prox = await asyncio.gather(*coroutines)
+        coroutines = (self.fetch(url + proto) for proto in protocols)
+        prox: list[str] = await asyncio.gather(*coroutines)
         self.proxies = tuple(
             f"{proto}://{proxy}"
             for proto, proxies in zip(protocols, prox)
@@ -79,15 +81,18 @@ class NitroGeneratorChecker:
                 continue
             code = "".join(choices(self.characters, k=16))
             url = (
-                f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
+                "https://discord.com/api/v9/entitlements/gift-codes/"
+                + code
                 + "?with_application=false&with_subscription_plan=true"
             )
             proxy = choice(self.proxies)
             connector = ProxyConnector.from_url(proxy)
             try:
                 async with ClientSession(connector=connector) as session:
-                    async with session.get(url, timeout=self.timeout) as r:
-                        status = r.status
+                    async with session.get(
+                        url, timeout=self.timeout
+                    ) as response:
+                        status = response.status
             except Exception as e:
                 # Too many open files
                 if isinstance(e, OSError) and e.errno == 24:
@@ -96,20 +101,20 @@ class NitroGeneratorChecker:
                     )
                 continue
             if status == 404:
-                self.console.print(f"{code} | Invalid")
+                self.console.print(code + " | Invalid")
                 self.count += 1
                 live.update(self.table)
             elif status == 429:
                 self.console.print(f"{code} | {proxy} is temporarily blocked")
-            elif 400 <= status:
+            elif status >= 400:
                 self.console.print(f"{code} | {status}")
             else:
-                gift = f"https://discord.gift/{code}"
+                gift = "https://discord.gift/" + code
                 async with aopen(self.file_name, "a", encoding="utf-8") as f:
-                    await f.write(f"\n{gift}")
+                    await f.write("\n" + gift)
                 if self.webhook_url:
                     async with self.session.post(
-                        self.webhook_url, json={"content": f"@everyone {gift}"}
+                        self.webhook_url, json={"content": "@everyone " + gift}
                     ):
                         pass
                 self.valid_count += 1
