@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from configparser import ConfigParser
 from random import choice, choices
 from string import ascii_letters, digits
@@ -148,10 +149,14 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        import uvloop
-    except ImportError:
-        pass
-    else:
-        uvloop.install()
+    if sys.implementation.name == "cpython" and sys.platform in {
+        "darwin",
+        "linux",
+    }:
+        try:
+            import uvloop
+        except ImportError:
+            pass
+        else:
+            uvloop.install()
     asyncio.run(main())
