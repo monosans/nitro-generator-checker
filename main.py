@@ -6,7 +6,7 @@ import sys
 from configparser import ConfigParser
 from random import choice, choices
 from string import ascii_letters, digits
-from typing import List, NoReturn, Optional
+from typing import List, NoReturn, Optional, Tuple
 
 from aiofiles import open as aopen
 from aiohttp import ClientSession
@@ -49,6 +49,7 @@ class NitroGeneratorChecker:
         self.characters = ascii_letters + digits
         self.count = 0
         self.valid_count = 0
+        self.proxies: Tuple[str, ...] = ()
 
     async def fetch(self, url: str) -> str:
         try:
@@ -65,11 +66,13 @@ class NitroGeneratorChecker:
         protocols = ("http", "socks4", "socks5")
         coroutines = (self.fetch(url + proto) for proto in protocols)
         prox: List[str] = await asyncio.gather(*coroutines)
-        self.proxies = tuple(
+        proxies = tuple(
             f"{proto}://{proxy}"
             for proto, proxies in zip(protocols, prox)
             for proxy in proxies.strip().splitlines()
         )
+        if proxies:
+            self.proxies = proxies
 
     async def grab_proxies(self) -> NoReturn:
         while True:
@@ -78,21 +81,19 @@ class NitroGeneratorChecker:
 
     async def checker(self, live: Live) -> NoReturn:
         while True:
-            if not self.proxies:
-                continue
             code = "".join(choices(self.characters, k=16))
             url = (
                 f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
                 + "?with_application=false&with_subscription_plan=true"
             )
             proxy = choice(self.proxies)
-            connector = ProxyConnector.from_url(proxy)
             try:
-                async with ClientSession(connector=connector) as session:
-                    async with session.get(
-                        url, timeout=self.timeout
-                    ) as response:
-                        status = response.status
+                async with ProxyConnector.from_url(proxy) as connector:
+                    async with ClientSession(connector=connector) as session:
+                        async with session.get(
+                            url, timeout=self.timeout
+                        ) as response:
+                            status = response.status
             except Exception as e:
                 # Too many open files
                 if isinstance(e, OSError) and e.errno == 24:
@@ -128,7 +129,11 @@ class NitroGeneratorChecker:
         return table
 
     async def main(self) -> None:
-        await self.set_proxies()
+        while True:
+            await self.set_proxies()
+            if self.proxies:
+                break
+            await asyncio.sleep(60)
         with Live(self.table, console=self.console) as live:
             coroutines = (self.checker(live) for _ in range(self.threads))
             await asyncio.gather(self.grab_proxies(), *coroutines)
