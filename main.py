@@ -6,7 +6,7 @@ import sys
 from configparser import ConfigParser
 from random import choice, choices
 from string import ascii_letters, digits
-from typing import List, NoReturn, Optional, Tuple
+from typing import List, NoReturn, Optional
 
 from aiofiles import open as aopen
 from aiohttp import ClientSession
@@ -49,7 +49,6 @@ class NitroGeneratorChecker:
         self.characters = ascii_letters + digits
         self.count = 0
         self.valid_count = 0
-        self.proxies: Tuple[str, ...] = ()
 
     async def fetch(self, url: str) -> str:
         try:
