@@ -62,9 +62,12 @@ class NitroGeneratorChecker:
         return ""
 
     async def set_proxies(self) -> None:
-        url = "https://api.proxyscrape.com/v2/?request=getproxies&protocol="
+        url = (
+            "https://raw.githubusercontent.com/"
+            + "monosans/proxy-list/main/proxies/{}.txt"
+        )
         protocols = ("http", "socks4", "socks5")
-        coroutines = (self.fetch(url + proto) for proto in protocols)
+        coroutines = (self.fetch(url.format(proto)) for proto in protocols)
         prox: List[str] = await asyncio.gather(*coroutines)
         proxies = tuple(
             f"{proto}://{proxy}"
