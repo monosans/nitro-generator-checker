@@ -15,8 +15,8 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
     - On Unix-like OS run `start.sh`
   - Manual:
     1. `cd` into the unpacked folder
-    1. Install dependencies with the command `python -m pip install -U -r requirements.txt`
-    1. Run with the command `python main.py`
+    1. Install dependencies with the command `python -m pip install -U --no-cache-dir --disable-pip-version-check pip setuptools wheel; python -m pip install -U --no-cache-dir --disable-pip-version-check -r requirements.txt`
+    1. Run with the command `python -m nitro_generator_checker`
 
 ## Buy me a coffee
 
