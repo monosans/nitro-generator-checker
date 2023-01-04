@@ -6,7 +6,7 @@ from configparser import ConfigParser
 from typing import Optional
 
 from aiofiles import open as aopen
-from aiohttp import ClientSession
+from aiohttp import ClientSession, DummyCookieJar
 from aiohttp_socks import ProxyConnector
 from rich.console import Console
 from rich.live import Live
@@ -58,7 +58,7 @@ class NitroChecker:
         config = ConfigParser()
         config.read(file_name, encoding="utf-8")
         cfg = config["DEFAULT"]
-        async with ClientSession() as session:
+        async with ClientSession(cookie_jar=DummyCookieJar()) as session:
             ngc = cls(
                 session=session,
                 threads=cfg.getint("Threads", 900),
@@ -78,7 +78,9 @@ class NitroChecker:
             proxy = self.proxy_generator.get_random_proxy()
             try:
                 async with ProxyConnector.from_url(proxy) as connector:
-                    async with ClientSession(connector=connector) as session:
+                    async with ClientSession(
+                        connector=connector, cookie_jar=self.session.cookie_jar
+                    ) as session:
                         async with session.get(
                             url, timeout=self.timeout
                         ) as response:
