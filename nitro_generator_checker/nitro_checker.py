@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sys
 from configparser import ConfigParser
 from typing import Optional
 
@@ -18,15 +19,36 @@ from .proxy_generator import ProxyGenerator
 logger = logging.getLogger(__name__)
 
 
+def validate_max_connections(value: int) -> int:
+    if sys.platform != "win32":
+        import resource
+
+        soft_limit, hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+        if soft_limit < hard_limit:
+            resource.setrlimit(
+                resource.RLIMIT_NOFILE, (hard_limit, hard_limit)
+            )
+    elif value > 512 and isinstance(
+        asyncio.get_event_loop_policy(), asyncio.WindowsSelectorEventLoopPolicy
+    ):
+        logger.warning(
+            "MaxConnections value is too high. "
+            + "Windows supports a maximum of 512. "
+            + "The config value will be ignored and 512 will be used."
+        )
+        return 512
+    return value
+
+
 class NitroChecker:
     __slots__ = (
         "console",
         "counter",
         "file_name",
+        "max_connections",
         "nitro_generator",
         "proxy_generator",
         "session",
-        "threads",
         "timeout",
         "webhook_url",
     )
@@ -35,7 +57,7 @@ class NitroChecker:
         self,
         *,
         session: ClientSession,
-        threads: int,
+        max_connections: int,
         webhook_url: Optional[str],
         timeout: float,
         file_name: str,
@@ -45,7 +67,7 @@ class NitroChecker:
         self.proxy_generator = ProxyGenerator(session)
         self.session = session
         self.console = console or Console()
-        self.threads = threads
+        self.max_connections = validate_max_connections(max_connections)
         self.webhook_url = webhook_url or None
         self.timeout = timeout
         self.file_name = file_name
@@ -61,7 +83,7 @@ class NitroChecker:
         async with ClientSession(cookie_jar=DummyCookieJar()) as session:
             ngc = cls(
                 session=session,
-                threads=cfg.getint("Threads", 900),
+                max_connections=cfg.getint("MaxConnections", 512),
                 webhook_url=cfg.get("WebhookURL"),
                 timeout=cfg.getfloat("Timeout", 10),
                 file_name=cfg.get("FileName", "nitro_codes.txt"),
@@ -88,7 +110,7 @@ class NitroChecker:
             except Exception as e:
                 # Too many open files
                 if isinstance(e, OSError) and e.errno == 24:
-                    logger.error("Please, set Threads to lower value.")
+                    logger.error("Please, set MaxConnections to lower value.")
                 continue
             if status == 404:
                 logger.info("%s | Invalid", code)
@@ -126,5 +148,7 @@ class NitroChecker:
         )
         await self.proxy_generator.wait_for_proxies()
         with Live(self.counter.as_rich_table(), console=self.console) as live:
-            coroutines = (self.checker(live) for _ in range(self.threads))
+            coroutines = (
+                self.checker(live) for _ in range(self.max_connections)
+            )
             await asyncio.gather(set_proxies_task, *coroutines)
