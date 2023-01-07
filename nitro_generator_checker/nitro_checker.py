@@ -69,7 +69,7 @@ class NitroChecker:
         self.console = console or Console()
         self.max_connections = validate_max_connections(max_connections)
         self.webhook_url = webhook_url or None
-        self.timeout = ClientTimeout(total=timeout, sock_connect=timeout)
+        self.timeout = ClientTimeout(total=timeout, sock_connect=float("inf"))
         self.file_name = file_name
         self.counter = Counter()
 
