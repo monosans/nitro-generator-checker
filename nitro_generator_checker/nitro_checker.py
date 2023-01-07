@@ -7,7 +7,7 @@ from configparser import ConfigParser
 from typing import Optional
 
 from aiofiles import open as aopen
-from aiohttp import ClientSession, DummyCookieJar
+from aiohttp import ClientSession, ClientTimeout, DummyCookieJar
 from aiohttp_socks import ProxyConnector
 from rich.console import Console
 from rich.live import Live
@@ -69,7 +69,7 @@ class NitroChecker:
         self.console = console or Console()
         self.max_connections = validate_max_connections(max_connections)
         self.webhook_url = webhook_url or None
-        self.timeout = timeout
+        self.timeout = ClientTimeout(total=timeout, sock_connect=timeout)
         self.file_name = file_name
         self.counter = Counter()
 
@@ -101,11 +101,11 @@ class NitroChecker:
             try:
                 async with ProxyConnector.from_url(proxy) as connector:
                     async with ClientSession(
-                        connector=connector, cookie_jar=self.session.cookie_jar
+                        connector=connector,
+                        cookie_jar=self.session.cookie_jar,
+                        timeout=self.timeout,
                     ) as session:
-                        async with session.get(
-                            url, timeout=self.timeout
-                        ) as response:
+                        async with session.get(url) as response:
                             status = response.status
             except Exception as e:
                 # Too many open files
