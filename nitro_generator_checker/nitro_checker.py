@@ -107,28 +107,33 @@ class NitroChecker:
                     ) as session:
                         async with session.get(url) as response:
                             status = response.status
-            except Exception as e:
+            except asyncio.TimeoutError:
+                logger.info("%s proxy timed out", proxy)
+            except OSError as e:
                 # Too many open files
-                if isinstance(e, OSError) and e.errno == 24:
+                if e.errno == 24:
                     logger.error("Please, set MaxConnections to lower value.")
-                continue
-            if status == 404:
-                logger.info("%s | Invalid", code)
-                self.counter.add_total()
-                live.update(self.counter.as_rich_table())
-            elif status == 429:
-                logger.info("%s proxy is temporarily blocked", proxy)
-            elif status >= 400:
-                logger.info("%s | HTTP status code %d", code, status)
+            except Exception:
+                pass
             else:
-                logger.info("%s | Valid", code)
-                gift_url = f"https://discord.gift/{code}"
-                await asyncio.gather(
-                    self.save_gift(gift_url), self.send_webhook_msg(gift_url)
-                )
-                self.counter.add_valid()
-                self.counter.add_total()
-                live.update(self.counter.as_rich_table())
+                if status == 404:
+                    logger.info("%s | Invalid", code)
+                    self.counter.add_total()
+                    live.update(self.counter.as_rich_table())
+                elif status == 429:
+                    logger.info("%s proxy is temporarily blocked", proxy)
+                elif status >= 400:
+                    logger.info("%s | HTTP status code %d", code, status)
+                else:
+                    logger.info("%s | Valid", code)
+                    gift_url = f"https://discord.gift/{code}"
+                    await asyncio.gather(
+                        self.save_gift(gift_url),
+                        self.send_webhook_msg(gift_url),
+                    )
+                    self.counter.add_valid()
+                    self.counter.add_total()
+                    live.update(self.counter.as_rich_table())
 
     async def save_gift(self, gift_url: str) -> None:
         async with aopen(self.file_name, "a", encoding="utf-8") as f:
