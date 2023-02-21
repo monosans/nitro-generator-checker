@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sys
+from configparser import ConfigParser
 
 import rich.traceback
 from rich.console import Console
@@ -43,15 +44,19 @@ def configure_logging(console: Console) -> None:
     )
 
 
-def main() -> None:
-    set_event_loop_policy()
+def get_config(file: str) -> ConfigParser:
+    cfg = ConfigParser(interpolation=None)
+    cfg.read(file, encoding="utf-8")
+    return cfg
 
+
+async def main() -> None:
     console = Console()
     configure_logging(console)
-
-    coro = NitroChecker.run_from_ini("config.ini", console=console)
-    asyncio.run(coro)
+    cfg = get_config("config.ini")
+    await NitroChecker.run_from_configparser(cfg, console=console)
 
 
 if __name__ == "__main__":
-    main()
+    set_event_loop_policy()
+    asyncio.run(main())

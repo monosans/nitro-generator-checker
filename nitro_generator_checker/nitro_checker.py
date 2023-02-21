@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 from configparser import ConfigParser
 from typing import Optional
 
@@ -12,32 +11,12 @@ from aiohttp_socks import ProxyConnector
 from rich.console import Console
 from rich.live import Live
 
+from . import validators
 from .counter import Counter
 from .nitro_generator import NitroGenerator
 from .proxy_generator import ProxyGenerator
 
 logger = logging.getLogger(__name__)
-
-
-def validate_max_connections(value: int) -> int:
-    if sys.platform != "win32":
-        import resource
-
-        soft_limit, hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
-        if soft_limit < hard_limit:
-            resource.setrlimit(
-                resource.RLIMIT_NOFILE, (hard_limit, hard_limit)
-            )
-    elif value > 512 and isinstance(
-        asyncio.get_event_loop_policy(), asyncio.WindowsSelectorEventLoopPolicy
-    ):
-        logger.warning(
-            "MaxConnections value is too high. "
-            + "Windows supports a maximum of 512. "
-            + "The config value will be ignored and 512 will be used."
-        )
-        return 512
-    return value
 
 
 class NitroChecker:
@@ -63,22 +42,23 @@ class NitroChecker:
         file_name: str,
         console: Optional[Console] = None,
     ) -> None:
+        validators.timeout(timeout)
+        validators.webhook_url(webhook_url)
+
+        self.console = console or Console()
+        self.counter = Counter()
+        self.file_name = file_name
+        self.max_connections = validators.max_connections(max_connections)
         self.nitro_generator = NitroGenerator()
         self.proxy_generator = ProxyGenerator(session)
         self.session = session
-        self.console = console or Console()
-        self.max_connections = validate_max_connections(max_connections)
-        self.webhook_url = webhook_url or None
         self.timeout = ClientTimeout(total=timeout, sock_connect=float("inf"))
-        self.file_name = file_name
-        self.counter = Counter()
+        self.webhook_url = webhook_url or None
 
     @classmethod
-    async def run_from_ini(
-        cls, file_name: str, *, console: Optional[Console] = None
+    async def run_from_configparser(
+        cls, config: ConfigParser, *, console: Optional[Console] = None
     ) -> None:
-        config = ConfigParser()
-        config.read(file_name, encoding="utf-8")
         cfg = config["DEFAULT"]
         async with ClientSession(cookie_jar=DummyCookieJar()) as session:
             ngc = cls(
