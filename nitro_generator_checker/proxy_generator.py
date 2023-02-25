@@ -19,8 +19,7 @@ class ProxyGenerator:
 
     async def set_proxies(self) -> None:
         url = (
-            "https://raw.githubusercontent.com/"
-            + "monosans/proxy-list/main/proxies/{}.txt"
+            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/{}.txt"
         )
         protocols = ("http", "socks4", "socks5")
         coroutines = (self._fetch(url.format(proto)) for proto in protocols)
@@ -47,14 +46,10 @@ class ProxyGenerator:
 
     async def _fetch(self, url: str) -> str:
         try:
-            async with self.session.get(
-                url, raise_for_status=True
-            ) as response:
+            async with self.session.get(url, raise_for_status=True) as response:
                 return await response.text()
         except Exception as e:
             logger.error(
-                "Couldn't download proxies | %s | %s",
-                e.__class__.__qualname__,
-                e,
+                "Couldn't download proxies | %s | %s", e.__class__.__qualname__, e
             )
         return ""

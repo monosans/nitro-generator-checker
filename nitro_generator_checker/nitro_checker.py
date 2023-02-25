@@ -75,7 +75,7 @@ class NitroChecker:
         for code in self.nitro_generator:
             url = (
                 f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
-                + "?with_application=false&with_subscription_plan=true"
+                "?with_application=false&with_subscription_plan=true"
             )
             proxy = self.proxy_generator.get_random_proxy()
             try:
@@ -91,25 +91,24 @@ class NitroChecker:
                 logger.info("%s proxy timed out", proxy)
             except OSError as e:
                 # Too many open files
-                if e.errno == 24:
+                if e.errno == 24:  # noqa: PLR2004
                     logger.error("Please, set MaxConnections to lower value.")
             except Exception:
                 pass
             else:
-                if status == 404:
+                if status == 404:  # noqa: PLR2004
                     logger.info("%s | Invalid", code)
                     self.counter.add_total()
                     live.update(self.counter.as_rich_table())
-                elif status == 429:
+                elif status == 429:  # noqa: PLR2004
                     logger.info("%s proxy is temporarily blocked", proxy)
-                elif status >= 400:
+                elif status >= 400:  # noqa: PLR2004
                     logger.info("%s | HTTP status code %d", code, status)
                 else:
                     logger.info("%s | Valid", code)
                     gift_url = f"https://discord.gift/{code}"
                     await asyncio.gather(
-                        self.save_gift(gift_url),
-                        self.send_webhook_msg(gift_url),
+                        self.save_gift(gift_url), self.send_webhook_msg(gift_url)
                     )
                     self.counter.add_valid()
                     self.counter.add_total()
@@ -128,12 +127,8 @@ class NitroChecker:
             pass
 
     async def run(self) -> None:
-        set_proxies_task = asyncio.create_task(
-            self.proxy_generator.run_inf_loop()
-        )
+        set_proxies_task = asyncio.create_task(self.proxy_generator.run_inf_loop())
         await self.proxy_generator.wait_for_proxies()
         with Live(self.counter.as_rich_table(), console=self.console) as live:
-            coroutines = (
-                self.checker(live) for _ in range(self.max_connections)
-            )
+            coroutines = (self.checker(live) for _ in range(self.max_connections))
             await asyncio.gather(set_proxies_task, *coroutines)
