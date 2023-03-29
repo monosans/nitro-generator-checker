@@ -43,6 +43,7 @@ class NitroChecker:
         console: Optional[Console] = None,
     ) -> None:
         validators.timeout(timeout)
+        webhook_url = webhook_url or None
         validators.webhook_url(webhook_url)
 
         self.console = console or Console()
@@ -53,7 +54,7 @@ class NitroChecker:
         self.proxy_generator = ProxyGenerator(session)
         self.session = session
         self.timeout = ClientTimeout(total=timeout, sock_connect=float("inf"))
-        self.webhook_url = webhook_url or None
+        self.webhook_url = webhook_url
 
     @classmethod
     async def run_from_configparser(
