@@ -80,14 +80,13 @@ class NitroChecker:
             )
             proxy = self.proxy_generator.get_random_proxy()
             try:
-                async with ProxyConnector.from_url(proxy) as connector:
-                    async with ClientSession(
-                        connector=connector,
-                        cookie_jar=self.session.cookie_jar,
-                        timeout=self.timeout,
-                    ) as session:
-                        async with session.get(url) as response:
-                            status = response.status
+                connector = ProxyConnector.from_url(proxy)
+                async with ClientSession(
+                    connector=connector,
+                    cookie_jar=self.session.cookie_jar,
+                    timeout=self.timeout,
+                ) as session, session.get(url) as response:
+                    pass
             except asyncio.TimeoutError:
                 logger.info("%s proxy timed out", proxy)
             except OSError as e:
@@ -97,6 +96,7 @@ class NitroChecker:
             except Exception:
                 pass
             else:
+                status = response.status
                 if status == 404:  # noqa: PLR2004
                     logger.info("%s | Invalid", code)
                     self.counter.add_total()

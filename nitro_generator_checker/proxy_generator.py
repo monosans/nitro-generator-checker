@@ -47,9 +47,13 @@ class ProxyGenerator:
     async def _fetch(self, url: str) -> str:
         try:
             async with self.session.get(url, raise_for_status=True) as response:
-                return await response.text()
+                await response.read()
+            return await response.text()
         except Exception as e:
             logger.error(
-                "Couldn't download proxies | %s | %s", e.__class__.__qualname__, e
+                "Couldn't download proxies | %s.%s | %s",
+                e.__class__.__module__,
+                e.__class__.__qualname__,
+                e,
             )
         return ""
