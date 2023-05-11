@@ -1,5 +1,7 @@
 # nitro-generator-checker
 
+[![CI](https://github.com/monosans/nitro-generator-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/monosans/nitro-generator-checker/actions/workflows/ci.yml)
+
 ![Screenshot](screenshot.png)
 
 Discord Nitro codes generator and checker with built-in proxy grabber. Saves working ones to a file or Webhook.
@@ -8,7 +10,7 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
 
 - Download and unpack [the archive with the program](https://github.com/monosans/nitro-generator-checker/archive/refs/heads/main.zip).
 - Edit `config.ini` according to your preference.
-- Install [Python](https://python.org/downloads) (minimum supported version is 3.7). During installation, be sure to check the box `Add Python to PATH`.
+- Install [Python](https://python.org/downloads) (minimum required version is 3.7).
 - Install dependencies and run the script. There are 2 ways to do this:
 
   - Automatic:
