@@ -5,7 +5,7 @@ import logging
 from configparser import ConfigParser
 from typing import Optional
 
-from aiofiles import open as aopen
+from aiofile import async_open
 from aiohttp import ClientSession, ClientTimeout, DummyCookieJar
 from aiohttp_socks import ProxyConnector
 from rich.console import Console
@@ -116,7 +116,7 @@ class NitroChecker:
                     live.update(self.counter.as_rich_table())
 
     async def save_gift(self, gift_url: str) -> None:
-        async with aopen(self.file_name, "a", encoding="utf-8") as f:
+        async with async_open(self.file_name, "a", encoding="utf-8") as f:
             await f.write(f"\n{gift_url}")
 
     async def send_webhook_msg(self, gift_url: str) -> None:
