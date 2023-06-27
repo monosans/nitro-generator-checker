@@ -18,9 +18,7 @@ class ProxyGenerator:
         self.proxies: Tuple[str, ...] = ()
 
     async def set_proxies(self) -> None:
-        url = (
-            "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/{}.txt"
-        )
+        url = "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/{}.txt"
         protocols = ("http", "socks4", "socks5")
         coroutines = (self._fetch(url.format(proto)) for proto in protocols)
         prox: List[str] = await asyncio.gather(*coroutines)

@@ -109,7 +109,8 @@ class NitroChecker:
                     logger.info("%s | Valid", code)
                     gift_url = f"https://discord.gift/{code}"
                     await asyncio.gather(
-                        self.save_gift(gift_url), self.send_webhook_msg(gift_url)
+                        self.save_gift(gift_url),
+                        self.send_webhook_msg(gift_url),
                     )
                     self.counter.add_valid()
                     self.counter.add_total()
@@ -128,8 +129,12 @@ class NitroChecker:
             pass
 
     async def run(self) -> None:
-        set_proxies_task = asyncio.create_task(self.proxy_generator.run_inf_loop())
+        set_proxies_task = asyncio.create_task(
+            self.proxy_generator.run_inf_loop()
+        )
         await self.proxy_generator.wait_for_proxies()
         with Live(self.counter.as_rich_table(), console=self.console) as live:
-            coroutines = (self.checker(live) for _ in range(self.max_connections))
+            coroutines = (
+                self.checker(live) for _ in range(self.max_connections)
+            )
             await asyncio.gather(set_proxies_task, *coroutines)
