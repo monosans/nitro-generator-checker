@@ -54,10 +54,6 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
 
     </details>
 
-## Buy me a coffee
-
-Ask for details on [Telegram](https://t.me/monosans) or [VK](https://vk.com/id607137534).
-
 ## License
 
 [MIT](LICENSE)
