@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from configparser import ConfigParser
+from types import MappingProxyType
 from typing import Optional
 
 from aiofile import async_open
@@ -17,6 +18,14 @@ from .nitro_generator import NitroGenerator
 from .proxy_generator import ProxyGenerator
 
 logger = logging.getLogger(__name__)
+HEADERS = MappingProxyType(
+    {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; rv:109.0)"
+            " Gecko/20100101 Firefox/116.0"
+        )
+    }
+)
 
 
 class NitroChecker:
@@ -61,7 +70,9 @@ class NitroChecker:
         cls, config: ConfigParser, *, console: Optional[Console] = None
     ) -> None:
         cfg = config["DEFAULT"]
-        async with ClientSession(cookie_jar=DummyCookieJar()) as session:
+        async with ClientSession(
+            headers=HEADERS, cookie_jar=DummyCookieJar()
+        ) as session:
             ngc = cls(
                 session=session,
                 max_connections=cfg.getint("MaxConnections", 512),
@@ -83,6 +94,7 @@ class NitroChecker:
                 connector = ProxyConnector.from_url(proxy)
                 async with ClientSession(
                     connector=connector,
+                    headers=HEADERS,
                     cookie_jar=self.session.cookie_jar,
                     timeout=self.timeout,
                 ) as session, session.get(url) as response:
