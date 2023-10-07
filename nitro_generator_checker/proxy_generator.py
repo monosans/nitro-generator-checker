@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import List, NoReturn, Tuple
+from typing import List, NoReturn
 
 from aiohttp import ClientSession
 
@@ -15,7 +15,6 @@ class ProxyGenerator:
 
     def __init__(self, session: ClientSession) -> None:
         self.session = session
-        self.proxies: Tuple[str, ...] = ()
         self.ready_event = asyncio.Event()
 
     async def set_proxies(self) -> None:
