@@ -11,11 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyGenerator:
-    __slots__ = ("proxies", "session")
+    __slots__ = ("proxies", "session", "ready_event")
 
     def __init__(self, session: ClientSession) -> None:
         self.session = session
         self.proxies: Tuple[str, ...] = ()
+        self.ready_event = asyncio.Event()
 
     async def set_proxies(self) -> None:
         url = "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/{}.txt"
@@ -29,15 +30,12 @@ class ProxyGenerator:
         )
         if proxies:
             self.proxies = proxies
+            self.ready_event.set()
 
     async def run_inf_loop(self) -> NoReturn:
         while True:
             await self.set_proxies()
             await asyncio.sleep(60)
-
-    async def wait_for_proxies(self) -> None:
-        while not self.proxies:
-            await asyncio.sleep(0)
 
     def get_random_proxy(self) -> str:
         return random.choice(self.proxies)

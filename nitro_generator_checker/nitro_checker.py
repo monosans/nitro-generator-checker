@@ -4,18 +4,18 @@ import asyncio
 import logging
 from configparser import ConfigParser
 from types import MappingProxyType
-from typing import Optional
+from typing import Optional, Tuple
 
-from aiofile import async_open
 from aiohttp import ClientSession, ClientTimeout, DummyCookieJar
 from aiohttp_socks import ProxyConnector
 from rich.console import Console
 from rich.live import Live
 
-from . import validators
+from . import result_handlers, validators
 from .counter import Counter
 from .nitro_generator import NitroGenerator
 from .proxy_generator import ProxyGenerator
+from .utils import create_background_task
 
 logger = logging.getLogger(__name__)
 HEADERS = MappingProxyType(
@@ -32,13 +32,12 @@ class NitroChecker:
     __slots__ = (
         "console",
         "counter",
-        "file_name",
         "max_connections",
         "nitro_generator",
         "proxy_generator",
         "session",
         "timeout",
-        "webhook_url",
+        "result_handlers",
     )
 
     def __init__(
@@ -57,13 +56,21 @@ class NitroChecker:
 
         self.console = console or Console()
         self.counter = Counter()
-        self.file_name = file_name
         self.max_connections = validators.max_connections(max_connections)
         self.nitro_generator = NitroGenerator()
         self.proxy_generator = ProxyGenerator(session)
         self.session = session
         self.timeout = ClientTimeout(total=timeout, sock_connect=float("inf"))
-        self.webhook_url = webhook_url
+
+        file_handler = result_handlers.FileHandler(file_name)
+        self.result_handlers: Tuple[result_handlers.ABCResultHandler, ...] = (
+            (
+                file_handler,
+                result_handlers.DiscordWebhookHandler(session, webhook_url),
+            )
+            if webhook_url
+            else (file_handler,)
+        )
 
     @classmethod
     async def run_from_configparser(
@@ -84,6 +91,7 @@ class NitroChecker:
             await ngc.run()
 
     async def checker(self, live: Live) -> None:
+        await self.proxy_generator.ready_event.wait()
         for code in self.nitro_generator:
             url = (
                 f"https://discord.com/api/v9/entitlements/gift-codes/{code}"
@@ -120,33 +128,19 @@ class NitroChecker:
                 else:
                     logger.info("%s | Valid", code)
                     gift_url = f"https://discord.gift/{code}"
-                    await asyncio.gather(
-                        self.save_gift(gift_url),
-                        self.send_webhook_msg(gift_url),
-                    )
+                    for handler in self.result_handlers:
+                        create_background_task(handler.save(gift_url))
                     self.counter.add_valid()
                     self.counter.add_total()
                     live.update(self.counter.as_rich_table())
 
-    async def save_gift(self, gift_url: str) -> None:
-        async with async_open(self.file_name, "a", encoding="utf-8") as f:
-            await f.write(f"\n{gift_url}")
-
-    async def send_webhook_msg(self, gift_url: str) -> None:
-        if not self.webhook_url:
-            return
-        async with self.session.post(
-            self.webhook_url, json={"content": f"@everyone {gift_url}"}
-        ):
-            pass
-
     async def run(self) -> None:
-        set_proxies_task = asyncio.create_task(
-            self.proxy_generator.run_inf_loop()
-        )
-        await self.proxy_generator.wait_for_proxies()
         with Live(self.counter.as_rich_table(), console=self.console) as live:
-            coroutines = (
-                self.checker(live) for _ in range(self.max_connections)
+            await asyncio.gather(
+                self.proxy_generator.run_inf_loop(),
+                *(
+                    result_handler.pre_run()
+                    for result_handler in self.result_handlers
+                ),
+                *(self.checker(live) for _ in range(self.max_connections)),
             )
-            await asyncio.gather(set_proxies_task, *coroutines)
