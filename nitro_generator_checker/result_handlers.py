@@ -6,6 +6,7 @@ from pathlib import Path
 
 from aiofile import async_open
 from aiohttp import ClientSession
+from typing_extensions import override
 
 from .utils import sync_to_async
 
@@ -28,6 +29,7 @@ class FileHandler(ABCResultHandler):
         self.file_path = file_path
         self._ready_event = asyncio.Event()
 
+    @override
     async def pre_run(self) -> None:
         def inner() -> None:
             path = Path(self.file_path)
@@ -39,6 +41,7 @@ class FileHandler(ABCResultHandler):
         await sync_to_async(inner)
         self._ready_event.set()
 
+    @override
     async def save(self, gift_url: str) -> None:
         await self._ready_event.wait()
         async with async_open(self.file_path, "a", encoding="utf-8") as f:
@@ -52,6 +55,7 @@ class DiscordWebhookHandler(ABCResultHandler):
         self.session = session
         self.url = url
 
+    @override
     async def save(self, gift_url: str) -> None:
         async with self.session.post(
             self.url, json={"content": f"@everyone {gift_url}"}

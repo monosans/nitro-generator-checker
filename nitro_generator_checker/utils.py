@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Callable, Coroutine, Set, TypeVar
+from typing import Callable, Coroutine, Set
+
+from typing_extensions import Any, TypeVar
 
 T = TypeVar("T")
 
