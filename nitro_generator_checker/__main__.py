@@ -32,7 +32,7 @@ def configure_logging(console: Console) -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        datefmt=logging.Formatter.default_time_format,
         handlers=(
             RichHandler(
                 console=console,
