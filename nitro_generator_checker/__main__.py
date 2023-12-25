@@ -28,7 +28,9 @@ def set_event_loop_policy() -> None:
 
 
 def configure_logging(console: Console) -> None:
-    rich.traceback.install(console=console)
+    rich.traceback.install(
+        console=console, width=None, extra_lines=0, word_wrap=True
+    )
     logging.basicConfig(
         level=logging.INFO,
         format="%(message)s",
@@ -39,6 +41,7 @@ def configure_logging(console: Console) -> None:
                 omit_repeated_times=False,
                 show_path=False,
                 rich_tracebacks=True,
+                tracebacks_extra_lines=0,
             ),
         ),
     )
