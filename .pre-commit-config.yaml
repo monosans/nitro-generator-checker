@@ -34,8 +34,10 @@ repos:
         args:
           - --scripts-are-modules
         additional_dependencies:
-          - aiofile<4
           - aiohttp<4
+          - certifi
+          - charset-normalizer<3
           - rich<14
+          - types-aiofiles
           - typing-extensions<5
           - uvloop<0.20; implementation_name == "cpython" and (sys_platform == "darwin" or sys_platform == "linux")
