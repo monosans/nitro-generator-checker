@@ -3,26 +3,21 @@ from __future__ import annotations
 import asyncio
 import logging
 from configparser import ConfigParser
-from types import MappingProxyType
 from typing import Optional, Tuple
 
-from aiohttp import ClientSession, ClientTimeout, DummyCookieJar
+from aiohttp import ClientSession, ClientTimeout, DummyCookieJar, TCPConnector
 from aiohttp_socks import ProxyConnector
 from rich.console import Console
 from rich.live import Live
 
 from . import result_handlers, validators
 from .counter import Counter
+from .http import HEADERS, SSL_CONTEXT, fallback_charset_resolver
 from .nitro_generator import NitroGenerator
 from .proxy_generator import ProxyGenerator
 from .utils import create_background_task
 
 logger = logging.getLogger(__name__)
-HEADERS = MappingProxyType({
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; rv:121.0) Gecko/20100101 Firefox/121.0"
-    )
-})
 
 
 class NitroChecker:
@@ -45,13 +40,13 @@ class NitroChecker:
         webhook_url: Optional[str],
         timeout: float,
         file_name: str,
-        console: Optional[Console] = None,
+        console: Console,
     ) -> None:
         validators.timeout(timeout)
         webhook_url = webhook_url or None
         validators.webhook_url(webhook_url)
 
-        self.console = console or Console()
+        self.console = console
         self.counter = Counter()
         self.max_connections = validators.max_connections(max_connections)
         self.nitro_generator = NitroGenerator()
@@ -71,11 +66,14 @@ class NitroChecker:
 
     @classmethod
     async def run_from_configparser(
-        cls, config: ConfigParser, *, console: Optional[Console] = None
+        cls, config: ConfigParser, *, console: Console
     ) -> None:
         cfg = config["DEFAULT"]
         async with ClientSession(
-            headers=HEADERS, cookie_jar=DummyCookieJar()
+            connector=TCPConnector(ssl=SSL_CONTEXT),
+            headers=HEADERS,
+            cookie_jar=DummyCookieJar(),
+            fallback_charset_resolver=fallback_charset_resolver,
         ) as session:
             ngc = cls(
                 session=session,
@@ -96,12 +94,13 @@ class NitroChecker:
             )
             proxy = self.proxy_generator.get_random_proxy()
             try:
-                connector = ProxyConnector.from_url(proxy)
+                connector = ProxyConnector.from_url(proxy, ssl=SSL_CONTEXT)
                 async with ClientSession(
                     connector=connector,
                     headers=HEADERS,
                     cookie_jar=self.session.cookie_jar,
                     timeout=self.timeout,
+                    fallback_charset_resolver=fallback_charset_resolver,
                 ) as session, session.get(url) as response:
                     pass
             except asyncio.TimeoutError:

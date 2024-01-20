@@ -5,11 +5,13 @@ import logging
 import sys
 from configparser import ConfigParser
 
+import aiofiles
 import rich.traceback
 from rich.console import Console
 from rich.logging import RichHandler
 
 from .nitro_checker import NitroChecker
+from .utils import bytes_decode
 
 
 def set_event_loop_policy() -> None:
@@ -47,16 +49,18 @@ def configure_logging(console: Console) -> None:
     )
 
 
-def get_config(file: str) -> ConfigParser:
+async def read_config(file: str) -> ConfigParser:
+    async with aiofiles.open(file, "rb") as f:
+        content = await f.read()
     cfg = ConfigParser(interpolation=None)
-    cfg.read(file, encoding="utf-8")
+    cfg.read_string(bytes_decode(content))
     return cfg
 
 
 async def main() -> None:
     console = Console()
     configure_logging(console)
-    cfg = get_config("config.ini")
+    cfg = await read_config("config.ini")
     await NitroChecker.run_from_configparser(cfg, console=console)
 
 
