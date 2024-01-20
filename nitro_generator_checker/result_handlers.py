@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABCMeta, abstractmethod
-from pathlib import Path
 
-from aiofile import async_open
+import aiofiles
+import aiofiles.os
+import aiofiles.ospath
 from aiohttp import ClientSession
 from typing_extensions import override
-
-from .utils import sync_to_async
 
 
 class ABCResultHandler(metaclass=ABCMeta):
@@ -31,20 +30,16 @@ class FileHandler(ABCResultHandler):
 
     @override
     async def pre_run(self) -> None:
-        def inner() -> None:
-            path = Path(self.file_path)
-            if path.is_dir():
-                msg = "FileName must be a file, not a directory"
-                raise ValueError(msg)
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        await sync_to_async(inner)
+        if await aiofiles.ospath.isdir(self.file_path):
+            msg = "FileName must be a file, not a directory"
+            raise ValueError(msg)
+        await aiofiles.os.makedirs(self.file_path, exist_ok=True)
         self._ready_event.set()
 
     @override
     async def save(self, gift_url: str) -> None:
         await self._ready_event.wait()
-        async with async_open(self.file_path, "a", encoding="utf-8") as f:
+        async with aiofiles.open(self.file_path, "a", encoding="utf-8") as f:
             await f.write(f"\n{gift_url}")
 
 
