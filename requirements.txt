@@ -2,10 +2,10 @@ aiodns>=1.1.1,<4
 aiofiles>=0.8
 aiohttp-socks>=0.7,<0.9
 aiohttp>=3.8.6,<4
-brotli>=1,<2; platform_python_implementation == "CPython"
-brotlicffi<2; platform_python_implementation != "CPython"
+brotli>=1,<2; implementation_name == "cpython"
+brotlicffi<2; implementation_name != "cpython"
 certifi
 charset-normalizer>=2,<4
 rich>=12.0,<14
 typing-extensions>=4.4,<5
-uvloop>=0.14,<0.20; platform_python_implementation == "CPython" and (sys_platform == "darwin" or sys_platform == "linux")
+uvloop>=0.14,<0.20; implementation_name == "cpython" and (sys_platform == "darwin" or sys_platform == "linux")
