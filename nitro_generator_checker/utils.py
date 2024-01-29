@@ -4,7 +4,8 @@ import asyncio
 from typing import Coroutine, Set
 
 import charset_normalizer
-from typing_extensions import Any
+
+from .typing_compat import Any
 
 background_tasks: Set[asyncio.Task[Any]] = set()
 

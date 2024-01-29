@@ -7,7 +7,8 @@ import aiofiles
 import aiofiles.os
 import aiofiles.ospath
 from aiohttp import ClientSession
-from typing_extensions import override
+
+from .typing_compat import override
 
 
 class ABCResultHandler(metaclass=ABCMeta):

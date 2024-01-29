@@ -4,7 +4,7 @@ import random
 import string
 from typing import Iterator
 
-from typing_extensions import override
+from .typing_compat import override
 
 
 class NitroGenerator(Iterator[str]):
