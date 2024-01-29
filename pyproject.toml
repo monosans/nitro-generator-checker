@@ -75,6 +75,7 @@ line-length = 80
 preview = true
 select = ["ALL"]
 target-version = "py37"
+typing-modules = ["nitro_generator_checker.typing_compat"]
 
 [tool.ruff.flake8-self]
 ignore-names = []
