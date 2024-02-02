@@ -8,7 +8,7 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
 
 ## Installation and usage
 
-- Install [Python](https://python.org/downloads). The minimum version required is 3.7. The recommended version is 3.11, because 3.12 may not install some libraries in the absence of a C compiler.
+- Install [Python](https://python.org/downloads). The minimum version required is 3.7.
 - Download and unpack [the archive with the program](https://github.com/monosans/nitro-generator-checker/archive/refs/heads/main.zip).
 - Edit `config.ini` to your preference.
 - Run the script that installs dependencies and starts `nitro-generator-checker`:
