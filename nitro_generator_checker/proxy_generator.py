@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyGenerator:
-    __slots__ = ("proxies", "session", "ready_event")
+    __slots__ = ("proxies", "ready_event", "session")
 
     def __init__(self, session: ClientSession) -> None:
         self.session = session

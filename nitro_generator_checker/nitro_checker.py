@@ -27,9 +27,9 @@ class NitroChecker:
         "max_connections",
         "nitro_generator",
         "proxy_generator",
+        "result_handlers",
         "session",
         "timeout",
-        "result_handlers",
     )
 
     def __init__(

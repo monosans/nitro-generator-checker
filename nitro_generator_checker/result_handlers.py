@@ -23,7 +23,7 @@ class ABCResultHandler(metaclass=ABCMeta):
 
 
 class FileHandler(ABCResultHandler):
-    __slots__ = ("file_path", "_ready_event")
+    __slots__ = ("_ready_event", "file_path")
 
     def __init__(self, file_path: str) -> None:
         self.file_path = file_path
