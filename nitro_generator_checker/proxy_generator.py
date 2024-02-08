@@ -3,52 +3,52 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import List, NoReturn
+from typing import NoReturn
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, hdrs
+
+from .http import get_response_text
 
 logger = logging.getLogger(__name__)
 
 
 class ProxyGenerator:
-    __slots__ = ("proxies", "ready_event", "session")
+    __slots__ = ("_etag", "_proxies", "_session", "ready_event")
 
-    def __init__(self, session: ClientSession) -> None:
-        self.session = session
+    def __init__(self, *, session: ClientSession) -> None:
+        self._etag = ""
+        self._session = session
         self.ready_event = asyncio.Event()
 
     async def set_proxies(self) -> None:
-        url = "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/{}.txt"
-        protocols = ("http", "socks4", "socks5")
-        coroutines = (self._fetch(url.format(proto)) for proto in protocols)
-        prox: List[str] = await asyncio.gather(*coroutines)
-        proxies = tuple(
-            f"{proto}://{proxy}"
-            for proto, proxies in zip(protocols, prox)
-            for proxy in proxies.strip().splitlines()
-        )
-        if proxies:
-            self.proxies = proxies
-            self.ready_event.set()
-
-    async def run_inf_loop(self) -> NoReturn:
-        while True:
-            await self.set_proxies()
-            await asyncio.sleep(60)
-
-    def get_random_proxy(self) -> str:
-        return random.choice(self.proxies)
-
-    async def _fetch(self, url: str) -> str:
+        headers = {hdrs.IF_NONE_MATCH: self._etag} if self._etag else None
         try:
-            async with self.session.get(url, raise_for_status=True) as response:
-                await response.read()
-            return await response.text()
+            async with self._session.get(
+                "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/all.txt",
+                headers=headers,
+            ) as response:
+                if response.status == 304:  # noqa: PLR2004
+                    return
+                content = await response.read()
+            r = get_response_text(response=response, content=content)
         except Exception as e:
             logger.error(
-                "Couldn't download proxies | %s.%s | %s",
+                "Failed downloading proxies | %s.%s | %s",
                 e.__class__.__module__,
                 e.__class__.__qualname__,
                 e,
             )
-        return ""
+        else:
+            if r:
+                self._proxies = tuple(r.splitlines())
+                self.ready_event.set()
+            if etag := response.headers.get(hdrs.ETAG):
+                self._etag = etag
+
+    async def run_inf_loop(self) -> NoReturn:
+        while True:
+            await self.set_proxies()
+            await asyncio.sleep(10)
+
+    def get_random_proxy(self) -> str:
+        return random.choice(self._proxies)

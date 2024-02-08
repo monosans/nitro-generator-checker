@@ -2,22 +2,22 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import sys
+import urllib.parse
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
-def max_connections(value: int) -> int:
+def max_connections(value: int, /) -> int:
     if value <= 0:
-        msg = "MaxConnections must be positive"
+        msg = "max_connections must be positive"
         raise ValueError(msg)
     max_supported = _get_supported_max_connections()
     if not max_supported or value <= max_supported:
         return value
     logger.warning(
-        "MaxConnections value is too high. "
+        "max_connections value is too high. "
         "Your OS supports a maximum of %d. "
         "The config value will be ignored and %d will be used.",
         max_supported,
@@ -38,7 +38,7 @@ def _get_supported_max_connections() -> Optional[int]:
 
     soft_limit, hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
     logger.debug(
-        "MaxConnections soft limit = %d, hard limit = %d, infinity = %d",
+        "max_connections soft limit = %d, hard limit = %d, infinity = %d",
         soft_limit,
         hard_limit,
         resource.RLIM_INFINITY,
@@ -47,7 +47,7 @@ def _get_supported_max_connections() -> Optional[int]:
         try:
             resource.setrlimit(resource.RLIMIT_NOFILE, (hard_limit, hard_limit))
         except ValueError as e:
-            logger.warning("Failed setting MaxConnections: %s", e)
+            logger.warning("Failed setting max_connection: %s", e)
         else:
             soft_limit = hard_limit
     if soft_limit == resource.RLIM_INFINITY:
@@ -55,15 +55,16 @@ def _get_supported_max_connections() -> Optional[int]:
     return soft_limit
 
 
-def webhook_url(value: Optional[str]) -> None:
-    if value is not None and not re.match(
-        r"https:\/\/discord\.com\/api\/webhooks\/[^\/]+\/[^\/]+", value
-    ):
-        msg = "WebhookURL does not match the pattern"
+def webhook_url(value: Optional[str], /) -> None:
+    if value is None:
+        return
+    url = urllib.parse.urlparse(value)
+    if not url.scheme or not url.netloc:
+        msg = f"invalid webhook_url: {value}"
         raise ValueError(msg)
 
 
-def timeout(value: float) -> None:
+def timeout(value: float, /) -> None:
     if value <= 0:
-        msg = "Timeout must be positive"
+        msg = "timeout must be positive"
         raise ValueError(msg)

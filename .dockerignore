@@ -1,0 +1,4 @@
+**
+!nitro_generator_checker/**/*.py
+!poetry.lock
+!pyproject.toml
