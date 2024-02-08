@@ -39,5 +39,5 @@ repos:
           - charset-normalizer<3
           - rich<14
           - types-aiofiles
-          - typing-extensions<5; python_version < "3.12"
+          - typing-extensions<5
           - uvloop<0.20; implementation_name == "cpython" and (sys_platform == "darwin" or sys_platform == "linux")

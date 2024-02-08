@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import asyncio
+import stat
 from abc import ABCMeta, abstractmethod
+from pathlib import Path
 
 import aiofiles
-import aiofiles.os
-import aiofiles.ospath
 from aiohttp import ClientSession
+from typing_extensions import override
 
-from .typing_compat import override
+from . import fs
+from .utils import asyncify
 
 
 class ABCResultHandler(metaclass=ABCMeta):
@@ -26,15 +28,20 @@ class FileHandler(ABCResultHandler):
     __slots__ = ("_ready_event", "file_path")
 
     def __init__(self, file_path: str) -> None:
-        self.file_path = file_path
+        self.file_path = Path(file_path)
         self._ready_event = asyncio.Event()
 
     @override
     async def pre_run(self) -> None:
-        if await aiofiles.ospath.isdir(self.file_path):
-            msg = "FileName must be a file, not a directory"
+        if await asyncify(self.file_path.is_file)():
+            await asyncify(fs.add_permission)(self.file_path, stat.S_IWUSR)
+        elif await asyncify(self.file_path.exists)():
+            msg = f"{self.file_path} must be a file"
             raise ValueError(msg)
-        await aiofiles.os.makedirs(self.file_path, exist_ok=True)
+        else:
+            await asyncify(fs.create_or_fix_dir)(
+                self.file_path.parent, permission=stat.S_IWUSR | stat.S_IXUSR
+            )
         self._ready_event.set()
 
     @override
