@@ -53,9 +53,9 @@ def configure_logging(*, console: Console) -> None:
         console=console, width=None, extra_lines=0, word_wrap=True
     )
     logging.basicConfig(
-        level=logging.INFO,
         format="%(message)s",
         datefmt=logging.Formatter.default_time_format,
+        level=logging.INFO,
         handlers=(
             RichHandler(
                 console=console,
@@ -65,6 +65,7 @@ def configure_logging(*, console: Console) -> None:
                 tracebacks_extra_lines=0,
             ),
         ),
+        force=True,
     )
 
 
