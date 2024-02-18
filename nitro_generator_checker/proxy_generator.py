@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 from aiohttp import ClientSession, hdrs
 
@@ -16,7 +16,7 @@ class ProxyGenerator:
     __slots__ = ("_etag", "_proxies", "_session", "ready_event")
 
     def __init__(self, *, session: ClientSession) -> None:
-        self._etag = ""
+        self._etag: Optional[str] = None
         self._session = session
         self.ready_event = asyncio.Event()
 
@@ -29,6 +29,7 @@ class ProxyGenerator:
             ) as response:
                 if response.status == 304:  # noqa: PLR2004
                     return
+                self._etag = response.headers.get(hdrs.ETAG)
                 content = await response.read()
             r = get_response_text(response=response, content=content)
         except Exception as e:
@@ -42,8 +43,6 @@ class ProxyGenerator:
             if r:
                 self._proxies = tuple(r.splitlines())
                 self.ready_event.set()
-            if etag := response.headers.get(hdrs.ETAG):
-                self._etag = etag
 
     async def run_inf_loop(self) -> NoReturn:
         while True:
