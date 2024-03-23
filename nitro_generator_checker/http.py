@@ -12,7 +12,7 @@ from .utils import bytes_decode
 SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 HEADERS: MappingProxyType[str, str] = MappingProxyType({
     hdrs.USER_AGENT: (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"  # noqa: E501
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"  # noqa: E501
     )
 })
 
