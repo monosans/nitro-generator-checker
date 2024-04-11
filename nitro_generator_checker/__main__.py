@@ -28,19 +28,29 @@ else:
 
 
 def set_event_loop_policy() -> None:
+    if sys.implementation.name == "cpython":
+        if sys.platform in {"cygwin", "win32"}:
+            try:
+                import winloop  # type: ignore[import-not-found]  # noqa: PLC0415
+            except ImportError:
+                pass
+            else:
+                try:
+                    policy = winloop.EventLoopPolicy()
+                except AttributeError:
+                    policy = winloop.WinLoopPolicy()
+                asyncio.set_event_loop_policy(policy)
+                return
+        elif sys.platform in {"darwin", "linux"}:
+            try:
+                import uvloop  # noqa: PLC0415
+            except ImportError:
+                pass
+            else:
+                asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+                return
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    elif sys.implementation.name == "cpython" and sys.platform in {
-        "darwin",
-        "linux",
-    }:
-        try:
-            import uvloop  # noqa: PLC0415
-        except ImportError:
-            pass
-        else:
-            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
 
 async def read_config(file: str, /) -> Dict[str, Any]:
     async with aiofiles.open(file, "rb") as f:

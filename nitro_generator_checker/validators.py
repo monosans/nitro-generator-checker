@@ -17,11 +17,14 @@ def max_connections(value: int, /) -> int:
     if not max_supported or value <= max_supported:
         return value
     logger.warning(
-        "max_connections value is too high. "
-        "Your OS supports a maximum of %d. "
-        "The config value will be ignored and %d will be used.",
+        "max_connections value is too high for your OS. "
+        "The config value will be ignored and %d will be used.%s",
         max_supported,
-        max_supported,
+        " To make max_connections unlimited, install the winloop library."
+        if sys.version_info >= (3, 9)
+        and sys.platform in {"cygwin", "win32"}
+        and sys.implementation.name == "cpython"
+        else "",
     )
     return max_supported
 
@@ -38,7 +41,7 @@ def _get_supported_max_connections() -> Optional[int]:
 
     soft_limit, hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
     logger.debug(
-        "max_connections soft limit = %d, hard limit = %d, infinity = %d",
+        "max_connections: soft limit = %d, hard limit = %d, infinity = %d",
         soft_limit,
         hard_limit,
         resource.RLIM_INFINITY,
@@ -47,7 +50,7 @@ def _get_supported_max_connections() -> Optional[int]:
         try:
             resource.setrlimit(resource.RLIMIT_NOFILE, (hard_limit, hard_limit))
         except ValueError as e:
-            logger.warning("Failed setting max_connection: %s", e)
+            logger.warning("Failed setting max_connections: %s", e)
         else:
             soft_limit = hard_limit
     if soft_limit == resource.RLIM_INFINITY:
