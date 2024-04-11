@@ -52,6 +52,7 @@ def set_event_loop_policy() -> None:
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+
 async def read_config(file: str, /) -> Dict[str, Any]:
     async with aiofiles.open(file, "rb") as f:
         content = await f.read()
