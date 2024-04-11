@@ -62,7 +62,7 @@ def webhook_url(value: Optional[str], /) -> None:
     if value is None:
         return
     url = urllib.parse.urlparse(value)
-    if not url.scheme or not url.netloc:
+    if url.scheme not in {"http", "https"} or not url.netloc:
         msg = f"invalid webhook_url: {value}"
         raise ValueError(msg)
 
