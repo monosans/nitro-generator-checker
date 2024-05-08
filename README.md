@@ -12,6 +12,8 @@ Discord Nitro codes generator and checker with built-in proxy grabber. Saves wor
 
 This is the easiest way, but it is only available for x86-64 Windows, x86-64/arm64 macOS and x86-64 Linux. Just download the archive for your OS from [nightly.link](https://nightly.link/monosans/nitro-generator-checker/workflows/ci/main?preview), unzip it, edit `config.toml` and run the `nitro_generator_checker` executable.
 
+If Windows antivirus detects the executable file as a virus, please read [this](https://github.com/Nuitka/Nuitka/issues/2496#issuecomment-1762836583).
+
 ### Docker
 
 - [Install `Docker Compose`](https://docs.docker.com/compose/install/).
