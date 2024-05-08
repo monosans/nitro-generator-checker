@@ -17,13 +17,17 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-13
-          - macos-14
+        include:
+          - name: linux-x86-64
+            runner: ubuntu-latest
+          - name: windows-x86-64
+            runner: windows-latest
+          - name: macos-x86-64
+            runner: macos-13
+          - name: macos-arm64
+            runner: macos-14
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - run: pipx install poetry
@@ -33,12 +37,10 @@ jobs:
           cache: poetry
           check-latest: true
       - run: poetry install --only=main,nuitka --sync --no-root --extras=non-termux --no-interaction
-      - run: poetry run --no-interaction python -m nuitka --onefile --python-flag='-m' --prefer-source-code --assume-yes-for-downloads nitro_generator_checker
+      - run: poetry run --no-interaction python -m nuitka --standalone --python-flag='-m' --assume-yes-for-downloads nitro_generator_checker
+      - run: mv config.toml nitro_generator_checker.dist/
       - uses: actions/upload-artifact@v4
         with:
-          name: artifact-${{ matrix.os }}
-          path: |
-            config.toml
-            nitro_generator_checker.bin
-            nitro_generator_checker.exe
+          name: artifact-${{ matrix.name }}
+          path: nitro_generator_checker.dist
           if-no-files-found: error
