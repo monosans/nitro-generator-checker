@@ -42,5 +42,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: artifact-${{ matrix.name }}
-          path: nitro_generator_checker.dist
+          path: nitro_generator_checker.dist/
           if-no-files-found: error
