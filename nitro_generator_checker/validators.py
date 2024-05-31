@@ -37,7 +37,7 @@ def _get_supported_max_connections() -> Optional[int]:
         ):
             return 512
         return None
-    import resource  # noqa: PLC0415
+    import resource  # type: ignore[unreachable, unused-ignore ]  # noqa: PLC0415
 
     soft_limit, hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)
     logger.debug(
