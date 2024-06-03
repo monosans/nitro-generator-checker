@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
-from typing import Callable, Coroutine, Set
+from typing import Callable, Coroutine
 
 import charset_normalizer
 from typing_extensions import Any, ParamSpec, TypeVar
@@ -11,7 +11,7 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 
-background_tasks: Set[asyncio.Task[Any]] = set()
+background_tasks: set[asyncio.Task[Any]] = set()
 
 
 def create_background_task(coro: Coroutine[Any, Any, Any], /) -> None:

@@ -4,7 +4,6 @@ import asyncio
 import logging
 import sys
 import urllib.parse
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ def max_connections(value: int, /) -> int:
     return max_supported
 
 
-def _get_supported_max_connections() -> Optional[int]:
+def _get_supported_max_connections() -> int | None:
     if sys.platform == "win32":
         if isinstance(
             asyncio.get_event_loop_policy(),
@@ -58,7 +57,7 @@ def _get_supported_max_connections() -> Optional[int]:
     return soft_limit
 
 
-def webhook_url(value: Optional[str], /) -> None:
+def webhook_url(value: str | None, /) -> None:
     if value is None:
         return
     url = urllib.parse.urlparse(value)

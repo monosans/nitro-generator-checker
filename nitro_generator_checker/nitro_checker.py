@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Mapping, Optional, Tuple
+from typing import TYPE_CHECKING, Mapping
 
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp_socks import ProxyConnector
-from rich.console import Console
 from rich.live import Live
 from typing_extensions import Any, Self
 
@@ -16,6 +15,9 @@ from .http import HEADERS, SSL_CONTEXT, fallback_charset_resolver
 from .nitro_generator import NitroGenerator
 from .proxy_generator import ProxyGenerator
 from .utils import create_background_task
+
+if TYPE_CHECKING:
+    from rich.console import Console
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ class NitroChecker:
         max_connections: int,
         session: ClientSession,
         timeout: float,
-        webhook_url: Optional[str],
+        webhook_url: str | None,
     ) -> None:
         validators.timeout(timeout)
         webhook_url = webhook_url or None
@@ -55,7 +57,7 @@ class NitroChecker:
         self._timeout = ClientTimeout(total=timeout, sock_connect=float("inf"))
 
         file_handler = result_handlers.FileHandler(file_name)
-        self._result_handlers: Tuple[result_handlers.ABCResultHandler, ...] = (
+        self._result_handlers: tuple[result_handlers.ABCResultHandler, ...] = (
             (
                 file_handler,
                 result_handlers.DiscordWebhookHandler(

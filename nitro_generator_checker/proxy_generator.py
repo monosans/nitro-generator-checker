@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import NoReturn, Optional
+from typing import NoReturn
 
 from aiohttp import ClientSession, hdrs
 
@@ -16,7 +16,7 @@ class ProxyGenerator:
     __slots__ = ("_etag", "_proxies", "_session", "ready_event")
 
     def __init__(self, *, session: ClientSession) -> None:
-        self._etag: Optional[str] = None
+        self._etag: str | None = None
         self._session = session
         self.ready_event = asyncio.Event()
 
