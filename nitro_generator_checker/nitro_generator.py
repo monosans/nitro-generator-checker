@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import random
 import string
+import sys
 from typing import Iterator
 
-from typing_extensions import override
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 
 class NitroGenerator(Iterator[str]):

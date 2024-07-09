@@ -2,16 +2,21 @@ from __future__ import annotations
 
 import asyncio
 import stat
+import sys
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiofiles
 from aiohttp import ClientConnectorError, ClientResponseError
-from typing_extensions import override
 
 from . import fs
 from .utils import asyncify
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 if TYPE_CHECKING:
     from aiohttp import ClientSession

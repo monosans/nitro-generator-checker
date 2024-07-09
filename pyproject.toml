@@ -23,7 +23,7 @@ certifi = "*"
 charset-normalizer = ">=2,<4"
 rich = ">=10.2,<14"
 tomli = { version = "<3", python = "<3.11" }
-typing-extensions = ">=4.4,<5"
+typing-extensions = { version = ">=4.4,<5", python = "<3.12" }
 uvloop = { version = ">=0.14,<0.20", optional = true, markers = "implementation_name == 'cpython' and (sys_platform == 'darwin' or sys_platform == 'linux')" }
 winloop = { version = "<0.1.5", markers = "implementation_name == 'cpython' and (sys_platform == 'cygwin' or sys_platform == 'win32')" }
 
@@ -36,6 +36,7 @@ mypy = "1.10.1"
 ruff = "0.5.1"
 tomli = "2.0.1"
 types-aiofiles = "24.1.0.20240626"
+typing-extensions = "4.12.2"
 
 [tool.poetry.group.nuitka]
 optional = true
