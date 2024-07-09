@@ -2,10 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import functools
-from typing import Callable, Coroutine
+from typing import TYPE_CHECKING
 
 import charset_normalizer
-from typing_extensions import Any, ParamSpec, TypeVar
+from typing_extensions import ParamSpec, TypeVar
+
+if TYPE_CHECKING:
+    from typing import Callable, Coroutine
+
+    from typing_extensions import Any
 
 T = TypeVar("T")
 P = ParamSpec("P")

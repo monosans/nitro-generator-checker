@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import ssl
 from types import MappingProxyType
+from typing import TYPE_CHECKING
 
 import certifi
 import charset_normalizer
-from aiohttp import ClientResponse, hdrs
+from aiohttp import hdrs
 
 from .utils import bytes_decode
+
+if TYPE_CHECKING:
+    from aiohttp import ClientResponse
 
 SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 HEADERS: MappingProxyType[str, str] = MappingProxyType({

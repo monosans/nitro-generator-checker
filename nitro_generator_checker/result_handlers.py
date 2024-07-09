@@ -4,13 +4,17 @@ import asyncio
 import stat
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import aiofiles
-from aiohttp import ClientConnectorError, ClientResponseError, ClientSession
+from aiohttp import ClientConnectorError, ClientResponseError
 from typing_extensions import override
 
 from . import fs
 from .utils import asyncify
+
+if TYPE_CHECKING:
+    from aiohttp import ClientSession
 
 
 class ABCResultHandler(metaclass=ABCMeta):

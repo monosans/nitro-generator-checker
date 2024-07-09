@@ -3,11 +3,16 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from typing import NoReturn
+from typing import TYPE_CHECKING
 
-from aiohttp import ClientSession, hdrs
+from aiohttp import hdrs
 
 from .http import get_response_text
+
+if TYPE_CHECKING:
+    from typing import NoReturn
+
+    from aiohttp import ClientSession
 
 logger = logging.getLogger(__name__)
 

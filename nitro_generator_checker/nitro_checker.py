@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Mapping
+from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp_socks import ProxyConnector
 from rich.live import Live
-from typing_extensions import Any, Self
 
 from . import result_handlers, validators
 from .counter import Counter
@@ -17,7 +16,10 @@ from .proxy_generator import ProxyGenerator
 from .utils import create_background_task
 
 if TYPE_CHECKING:
+    from typing import Mapping
+
     from rich.console import Console
+    from typing_extensions import Any, Self
 
 logger = logging.getLogger(__name__)
 
