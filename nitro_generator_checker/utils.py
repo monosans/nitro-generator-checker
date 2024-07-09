@@ -5,15 +5,14 @@ import functools
 from typing import TYPE_CHECKING
 
 import charset_normalizer
-from typing_extensions import ParamSpec, TypeVar
 
 if TYPE_CHECKING:
     from typing import Callable, Coroutine
 
-    from typing_extensions import Any
+    from typing_extensions import Any, ParamSpec, TypeVar
 
-T = TypeVar("T")
-P = ParamSpec("P")
+    T = TypeVar("T")
+    P = ParamSpec("P")
 
 
 background_tasks: set[asyncio.Task[Any]] = set()

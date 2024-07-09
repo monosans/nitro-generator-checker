@@ -10,16 +10,10 @@ import rich.traceback
 from aiohttp import ClientSession, DummyCookieJar, TCPConnector
 from rich.console import Console
 from rich.logging import RichHandler
-from typing_extensions import TypeVar
 
 from . import http
 from .nitro_checker import NitroChecker
 from .utils import bytes_decode
-
-if TYPE_CHECKING:
-    from typing import Callable, Coroutine
-
-    from typing_extensions import Any
 
 if sys.version_info >= (3, 11):
     try:
@@ -31,7 +25,12 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    from typing import Callable, Coroutine
+
+    from typing_extensions import Any, TypeVar
+
+    T = TypeVar("T")
 
 
 def get_async_run() -> Callable[[Coroutine[Any, Any, T]], T]:
