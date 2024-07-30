@@ -776,12 +776,12 @@ files = [
 
 [[package]]
 name = "nuitka"
-version = "2.4.2"
+version = "2.4.4"
 description = "Python compiler with full language support and CPython compatibility"
 optional = false
 python-versions = "*"
 files = [
-    {file = "Nuitka-2.4.2.tar.gz", hash = "sha256:cf57c72417e6ce1959c34a404f055cbe3714306f01455917426604b4cfec7980"},
+    {file = "Nuitka-2.4.4.tar.gz", hash = "sha256:0860799f8bf6c63411a768feb7ccdb01d9084fa37c14a25f1075670ba329b37e"},
 ]
 
 [package.dependencies]
@@ -1277,4 +1277,4 @@ termux = []
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "419b19d938d8d4a0805594597a060b237fe23c5841fd4de5757ce70304f34924"
+content-hash = "7e4b2e60209b8d59f40793dd3aa1a0217fe967bb1648ab4b899c00746eeae309"
