@@ -30,7 +30,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
     permissions:
       id-token: write
-      contents: read
       attestations: write
     steps:
       - uses: actions/checkout@v4
