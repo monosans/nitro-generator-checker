@@ -34,14 +34,14 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@v4
-      - run: pipx install poetry
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: poetry
           check-latest: true
-      - run: poetry install --only=main,nuitka --sync --no-root --extras=non-termux --no-interaction
-      - run: poetry run --no-interaction python -m nuitka --standalone --python-flag='-m' --assume-yes-for-downloads nitro_generator_checker
+      - run: uv run --extra non-termux --extra nuitka --no-dev --frozen --python 3.12 python -m nuitka --standalone --python-flag='-m' --assume-yes-for-downloads --lto=yes nitro_generator_checker
       - run: mv config.toml nitro_generator_checker.dist/
       - if: ${{ github.event_name != 'pull_request' }}
         uses: actions/attest-build-provenance@v1
