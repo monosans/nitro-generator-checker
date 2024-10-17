@@ -26,7 +26,8 @@ else:
     import tomli as tomllib
 
 if TYPE_CHECKING:
-    from typing import Callable, Coroutine
+    from collections.abc import Coroutine
+    from typing import Callable
 
     from typing_extensions import Any, TypeVar
 

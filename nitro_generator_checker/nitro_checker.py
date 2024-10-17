@@ -16,7 +16,7 @@ from .proxy_generator import ProxyGenerator
 from .utils import create_background_task
 
 if TYPE_CHECKING:
-    from typing import Mapping
+    from collections.abc import Mapping
 
     from rich.console import Console
     from typing_extensions import Any, Self
@@ -98,13 +98,16 @@ class NitroChecker:
             proxy = self._proxy_generator.get_random_proxy()
             try:
                 connector = ProxyConnector.from_url(proxy, ssl=SSL_CONTEXT)
-                async with ClientSession(
-                    connector=connector,
-                    headers=HEADERS,
-                    cookie_jar=self._session.cookie_jar,
-                    timeout=self._timeout,
-                    fallback_charset_resolver=fallback_charset_resolver,
-                ) as session, session.get(url) as response:
+                async with (
+                    ClientSession(
+                        connector=connector,
+                        headers=HEADERS,
+                        cookie_jar=self._session.cookie_jar,
+                        timeout=self._timeout,
+                        fallback_charset_resolver=fallback_charset_resolver,
+                    ) as session,
+                    session.get(url) as response,
+                ):
                     pass
             except asyncio.TimeoutError:
                 logger.info("%s proxy timed out", proxy)

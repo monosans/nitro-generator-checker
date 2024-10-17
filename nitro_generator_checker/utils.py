@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING
 import charset_normalizer
 
 if TYPE_CHECKING:
-    from typing import Callable, Coroutine
+    from collections.abc import Coroutine
+    from typing import Callable
 
     from typing_extensions import Any, ParamSpec, TypeVar
 
