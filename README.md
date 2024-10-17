@@ -29,7 +29,7 @@ If Windows antivirus detects the executable file as a virus, please read [this](
 
 #### Desktop
 
-- Install [Python](https://python.org/downloads). The minimum version required is 3.8.
+- Install [Python](https://python.org/downloads). The minimum version required is 3.9.
 - Download and unpack [the archive with the program](https://github.com/monosans/nitro-generator-checker/archive/refs/heads/main.zip).
 - Edit `config.toml` to your preference.
 - Run the script that installs dependencies and starts `nitro-generator-checker`:
