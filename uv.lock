@@ -695,7 +695,7 @@ requires-dist = [
     { name = "rich", specifier = ">=10.2,<14" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = "<3" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.4,<5" },
-    { name = "uvloop", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin' and extra == 'non-termux') or (implementation_name == 'cpython' and sys_platform == 'linux' and extra == 'non-termux')", specifier = ">=0.21,<0.22" },
+    { name = "uvloop", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin' and extra == 'non-termux') or (implementation_name == 'cpython' and sys_platform == 'linux' and extra == 'non-termux')", specifier = ">=0.14,<0.22" },
     { name = "winloop", marker = "(implementation_name == 'cpython' and sys_platform == 'cygwin') or (implementation_name == 'cpython' and sys_platform == 'win32')", specifier = "<0.1.7" },
 ]
 
